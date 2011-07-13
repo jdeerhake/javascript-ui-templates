@@ -86,7 +86,8 @@ var myModal = NS.ui.modal({
   showOnCreate : false,
   onHide : function() {
     console.log("Modal hidden");
-  }
+  },
+  content : "<p>Hi there</p><div id='close_button'></div>"
 });
 
 myModal.show();
