@@ -1,20 +1,45 @@
-/*global GS, jQuery*/
+/*global NS, jQuery*/
 
 var NS = NS || {};
+NS.ui = NS.ui || {};
 
 NS.ui.modal = (function() {
 
   var tmpl = {
-    overlay : GS.template("<div class='modal_overlay'></div>"),
-    box : GS.template("<div class='modal_box'>{{content}}</div>")
+    overlay : "<div class='modal_overlay'></div>",
+    box : "<div class='modal_box'>{{{content}}}</div>"
   };
+
+  //Takes a member of tmpl (string), an object to fill it, and (optionally) a
+  //jQuery object to append the result to.
+  function jqTemplate(template, obj, append) {
+    var el = jQuery(Mustache.to_html(tmpl[template], obj));
+    if(append) {
+      return el.appendTo(append);
+    } else {
+      return el;
+    }
+  }
+
+
+  // Centers given element within its parent
+  // This won't work if the element is hidden
+  function center(el) {
+    el.css({
+      position : "absolute",
+      top : "50%",
+      left : "50%",
+      marginTop : el.outerHeight() / -2,
+      marginLeft : el.outerWidth() / -2
+    });
+  }
 
   return function(conf) {
     var settings = jQuery.extend({
       fadeTime : 300,
       onShow : function() {},
       onHide : function() {},
-      showOnCreate : true,
+      autoShow : true,
       timeout : false
     }, conf),
     content = settings.content,
@@ -22,20 +47,10 @@ NS.ui.modal = (function() {
     isOpen = false,
     box, overlay;
 
-
-    var center = function(el) {
-      // This won't work if the element is hidden
-      el.css({
-        position : "absolute",
-        top : "50%",
-        left : "50%",
-        marginTop : el.outerHeight() / -2,
-        marginLeft : el.outerWidth() / -2
-      });
-    },
-    create = function() {
-      overlay = jQuery(tmpl.overlay()).hide().appendTo(body);
-      box = jQuery(tmpl.box({ content : content })).appendTo(overlay);
+    // Create necessary elements for modal
+    function create() {
+      overlay = jqTemplate("overlay", {}, body).hide();
+      box = jqTemplate("box", { content : content }, overlay);
     };
 
     var pub = {
@@ -60,7 +75,10 @@ NS.ui.modal = (function() {
     (function() {
       create();
 
-      overlay.bind("click", pub.hide);
+      overlay.bind("click", function(ev) {
+        // Prevent bubbling
+        if(ev.target.className === "modal_overlay") pub.hide();
+      });
 
       if(settings.showOnCreate) {
         pub.show();
@@ -82,23 +100,22 @@ NS.ui.modal = (function() {
 
 var myModal = NS.ui.modal({
   fadeTime : 100,
-  timeout : 5000,
-  showOnCreate : false,
+  autoShow : false,
   onHide : function() {
     console.log("Modal hidden");
   },
-  content : "<p>Hi there</p><div id='close_button'></div>"
+  content : "<p>Hi there</p><div class='close_button'></div>"
 });
 
-myModal.show();
-
-jQuery("#close_button").bind("click", myModal.hide);
+jQuery("button").click(myModal.show);
+jQuery(".close_button").live("click", myModal.hide);
 
 
 /**********************
- * Suggested CSS
- **********************
+ * Basic CSS
+ **********************/
 
+/*
 .modal_overlay {
   width: 100%;
   height: 100%;

@@ -1,16 +1,16 @@
 /* Globals declaration to make JSLint happy */
-/*global GS, jQuery*/
+/*global NS, jQuery*/
 
 /* NS is the namespace used in your app.  I put all gadget functions under the ui property */
-NS.ui. = (function() {
+NS.ui.gadget = (function() {
 
   /* Class vars - available to and modifiable by each instance of the gadget */
   var instances = [];
 
   /* Templates */
   var tmpl = {
-    overlay : GS.template("<div class='modal_overlay'></div>"),
-    box : GS.template("<div class='modal_box'>{{content}}</div>")
+    overlay : "<div class='out'></div>",
+    box : "<div class='thingy'>{{content}}</div>"
   };
 
   /* Everything above this line will get executed on every page load, so it should be very very light and should not use jQuery selectors or touch the DOM in any way */
@@ -56,4 +56,20 @@ NS.ui. = (function() {
     return pub;
   };
 }());
+
+
+/**********************
+ * Usage
+ **********************/
+
+var myThingy = NS.ui.gadget({
+  fadeTime : 100
+});
+
+
+/**********************
+ * Basic CSS
+ **********************
+
+#thing { display: block; }
 
